@@ -16,6 +16,10 @@ var ciEnvs = [
   'TF_BUILD',
 ];
 
-module.exports = !!Object.keys(process.env).filter(function (env) {
-  return ciEnvs.indexOf(env) !== -1;
-}).length;
+module.exports = isCi;
+
+function isCi() {
+  return !!Object.keys(process.env).filter(function (env) {
+    return ciEnvs.indexOf(env) !== -1;
+  }).length;
+}

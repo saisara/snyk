@@ -5,10 +5,9 @@ var apiKey = '123456789';
 var notAuthorizedApiKey = 'notAuthorized';
 var oldkey;
 var oldendpoint;
-var chalk = require('chalk');
 var port = process.env.PORT = process.env.SNYK_PORT = 12345;
 var sinon = require('sinon');
-var proxyquire = require('proxyquire');
+var isCi = require('../src/lib/is-ci');
 var parse = require('url').parse;
 var policy = require('snyk-policy');
 const stripAnsi = require('strip-ansi');
@@ -181,9 +180,8 @@ test('snyk ignore - all options', function (t) {
     {'*': {
       reason: 'REASON',
       expires: new Date('2017-10-07T00:00:00.000Z'), },
-    },
-  ],
-                   };
+    }],
+  };
   var dir = testUtils.tmpdir();
   cli.ignore({
     id: 'ID',
@@ -284,7 +282,7 @@ test('auth via invalid key', function (t) {
   });
 });
 
-test('auth via github', function (t) {
+test('auth via web', function (t) {
   var tokenRequest = null;
 
   var openSpy = sinon.spy(function (url) {
@@ -292,11 +290,7 @@ test('auth via github', function (t) {
     tokenRequest.token = tokenRequest.query.split('=').pop();
   });
 
-  var auth = proxyquire('../src/cli/commands/auth', {
-    open: openSpy,
-    '../../lib/is-ci': false,
-  });
-
+  var auth = sinon.stub(isCi, 'isCi').returns(false);
   var unhook = testUtils.silenceLog();
 
   auth().then(function (res) {
